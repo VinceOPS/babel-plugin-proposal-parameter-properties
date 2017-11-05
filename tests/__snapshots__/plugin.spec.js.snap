@@ -1,16 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Class declaration syntax does not transform when decorator is not valid 1`] = `
+exports[`Decorated classes only:  does not transform when decorator is not valid 1`] = `
 "@baddecorator
 class DoNotCare {
   constructor(prop1) {}
 }"
 `;
 
-exports[`Class declaration syntax does transform when decorator is valid 1`] = `
+exports[`Decorated classes only:  does not transform when no decorator are set 1`] = `
+"class DoNotCare {
+  constructor(prop1) {}
+}"
+`;
+
+exports[`Decorated classes only:  does transform when decorator is valid 1`] = `
 "class DoCare {
   constructor(prop1) {
     this.prop1 = prop1;
+  }
+}"
+`;
+
+exports[`Transformation:  always puts assignments after a call to super() 1 1`] = `
+"class DoCare extends Imaginary {
+  constructor(prop1, prop2) {
+    super();
+    this.prop1 = prop1;
+    this.prop2 = prop2;
+  }
+}"
+`;
+
+exports[`Transformation:  always puts assignments after a call to super() 2 1`] = `
+"class DoCare extends Imaginary {
+  constructor(prop1, prop2) {
+    console.log(\\"ok\\");
+    super();
+    this.prop1 = prop1;
+    this.prop2 = prop2;
   }
 }"
 `;

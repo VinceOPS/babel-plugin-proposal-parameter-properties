@@ -20,10 +20,7 @@ class ParameterProperties {
         this.undecorate(node);
 
         const ctor = this.getConstructor(node);
-        for (const param of ctor.params) {
-            const assignement = this.getAssignmentStatement(param);
-            ctor.body.body.unshift(assignement);
-        }
+        this.insertAssignments(ctor);
     }
 
     /**
@@ -62,6 +59,27 @@ class ParameterProperties {
         const classBody = node.body;
         return classBody.body.find(subNode => {
             return subNode.type === 'ClassMethod' && subNode.kind === 'constructor';
+        });
+    }
+
+    /**
+     * Insert the parameter properties assignments in the constructor body.
+     * If a call to `super` is found, append the statements just after it,
+     * otherwise, "prepend" the statements.
+     *
+     * @param {babel.types.ClassMethod} ctor Class constructor.
+     */
+    insertAssignments(ctor) {
+        const ctorBody = ctor.body.body;
+        const superIndex = ctorBody.findIndex(n =>
+            n.type === 'ExpressionStatement' &&
+                    n.expression.type === 'CallExpression' &&
+                    n.expression.callee.type === 'Super');
+
+        ctor.params.forEach((param, i) => {
+            const assignment = this.getAssignmentStatement(param);
+            const index = superIndex + 1 + i;
+            ctorBody.splice(index, 0, assignment);
         });
     }
 

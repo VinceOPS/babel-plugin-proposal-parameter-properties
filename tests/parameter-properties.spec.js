@@ -66,4 +66,66 @@ describe('ParameterProperties', () => {
             expect(classDeclaration.decorators[0]).toBe(random);
         });
     });
+
+    describe('insertAssignments', () => {
+        it('inserts all expected assignments', () => {
+            const paramsCount = 3;
+            const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);;
+
+            const ctor = t.classMethod('constructor',
+                t.identifier('constructor'),
+                params.map(e => t.identifier(e)),
+                t.blockStatement([]));
+            const ctorBody = ctor.body.body;
+            classBody.body.push(ctor);
+
+            paramProps.insertAssignments(ctor);
+            expect(ctorBody.length).toBe(paramsCount);
+
+            ctorBody.forEach((node, i) => {
+                const expr = node.expression;
+                expect(expr.type).toBe('AssignmentExpression');
+                expect(expr.operator).toBe('=');
+                expect(expr.left.object.name).toBe('this');
+                expect(expr.left.property.name).toBe(`prop${i}`);
+                expect(expr.right.name).toBe(`prop${i}`);
+            });
+        });
+
+        it('inserts after a call to super()', () => {
+            const paramsCount = 2;
+            const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);;
+
+            const ctor = t.classMethod('constructor',
+                t.identifier('constructor'),
+                params.map(e => t.identifier(e)),
+                t.blockStatement([
+                    // add call to super()
+                    t.expressionStatement(
+                        t.callExpression(t.super(), [])
+                    )
+                ]));
+            const ctorBody = ctor.body.body;
+            classBody.body.push(ctor);
+
+            paramProps.insertAssignments(ctor);
+            expect(ctorBody.length).toBe(paramsCount + 1);
+
+            ctorBody.forEach((node, i) => {
+                const expr = node.expression;
+
+                if (i === 0) {
+                    expect(expr.type).toBe('CallExpression');
+                    expect(expr.callee.type).toBe('Super');
+                    return;
+                }
+
+                expect(expr.type).toBe('AssignmentExpression');
+                expect(expr.operator).toBe('=');
+                expect(expr.left.object.name).toBe('this');
+                expect(expr.left.property.name).toBe(`prop${i - 1}`);
+                expect(expr.right.name).toBe(`prop${i - 1}`);
+            });
+        });
+    });
 });
