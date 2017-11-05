@@ -1,0 +1,33 @@
+{
+  "name": "babel-plugin-proposal-parameter-properties",
+  "version": "1.0.0",
+  "description": "Create and initialize a member in one place (from TypeScript \"Parameter properties\")",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VinceOPS/babel-plugin-proposal-parameter-properties.git"
+  },
+  "keywords": [
+    "babel",
+    "babel-plugin",
+    "parameter",
+    "properties",
+    "parameter-properties"
+  ],
+  "author": "VinceOPS",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VinceOPS/babel-plugin-proposal-parameter-properties/issues"
+  },
+  "homepage": "https://github.com/VinceOPS/babel-plugin-proposal-parameter-properties#readme",
+  "devDependencies": {
+    "@types/babel-types": "^6.25.1",
+    "babel-core": "^6.26.0",
+    "babel-plugin-syntax-decorators": "^6.13.0",
+    "babel-preset-es2015": "^6.24.1",
+    "jest": "^21.2.1"
+  }
+}

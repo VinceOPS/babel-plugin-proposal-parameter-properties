@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Class declaration syntax does not transform when decorator is not valid 1`] = `
+"@baddecorator
+class DoNotCare {
+  constructor(prop1) {}
+}"
+`;
+
+exports[`Class declaration syntax does transform when decorator is valid 1`] = `
+"class DoCare {
+  constructor(prop1) {
+    this.prop1 = prop1;
+  }
+}"
+`;
