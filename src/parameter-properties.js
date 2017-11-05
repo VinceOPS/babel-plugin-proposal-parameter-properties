@@ -47,7 +47,7 @@ class ParameterProperties {
      */
     undecorate(node) {
         node.decorators = node.decorators.filter(d => {
-            d.expression && d.expression.name !== DECORATOR;
+            return d.expression && d.expression.name !== DECORATOR;
         });
     }
 

@@ -54,4 +54,16 @@ describe('ParameterProperties', () => {
             expect(dec.expression.name).toBe(DECORATOR);
         });
     });
+
+    describe('undecorate', () => {
+        it('removes all occurrences of our decorator', () => {
+            const random = t.decorator(t.identifier('random'));
+            // add a random decorator and a second occurrence of our decorator
+            classDeclaration.decorators.push(random, decorator);
+
+            paramProps.undecorate(classDeclaration);
+            expect(classDeclaration.decorators.length).toBe(1);
+            expect(classDeclaration.decorators[0]).toBe(random);
+        });
+    });
 });
