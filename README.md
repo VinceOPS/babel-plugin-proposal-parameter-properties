@@ -42,20 +42,26 @@ npm install --save-dev babel-plugin-proposal-parameter-properties
 
 ```json
 {
-  "plugins": ["babel-plugin-proposal-parameter-properties"]
+  "plugins": [
+      "babel-plugin-syntax-decorators",
+      "babel-plugin-proposal-parameter-properties"
+    ]
 }
 ```
 
 ### Via CLI
 
 ```sh
-babel --plugins babel-plugin-proposal-parameter-properties script.js
+babel script.js --plugins=babel-plugin-syntax-decorators,babel-plugin-proposal-parameter-properties
 ```
 
 ### Via Node API
 
 ```javascript
 require("@babel/core").transform("code", {
-  plugins: ["babel-plugin-proposal-parameter-properties"]
+    plugins: [
+        "babel-plugin-syntax-decorators",
+        "babel-plugin-proposal-parameter-properties"
+    ]
 });
 ```
