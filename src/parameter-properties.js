@@ -28,7 +28,7 @@ class ParameterProperties {
      *
      * @param {babel.types.ClassDeclaration} node ClassDeclaration node.
      *
-     * @return {babel.types.Decorator} The plugin-specific decorator.
+     * @return {babel.types.Decorator} The plugin-specific decorator (or `undefined`).
      */
     getDecorator(node) {
         return (node.decorators || []).find(decorator => {
@@ -40,7 +40,7 @@ class ParameterProperties {
      * Remove paramProperties decorators from the class
      * declaration.
      *
-     * @param {babel.types.ClassDeclaration} node
+     * @param {babel.types.ClassDeclaration} node Node decorated with 'paramProperties'.
      */
     undecorate(node) {
         node.decorators = node.decorators.filter(d => {
@@ -49,11 +49,11 @@ class ParameterProperties {
     }
 
     /**
-     * Get the constructor of `node`.
+     * Get the constructor of the `node` class.
      *
      * @param {babel.types.ClassDeclaration} node ClassDeclaration node.
      *
-     * @return {babel.types.ClassMethod} `node` constructor.
+     * @return {babel.types.ClassMethod} `node` class constructor.
      */
     getConstructor(node) {
         const classBody = node.body;
