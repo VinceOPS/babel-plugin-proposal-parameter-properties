@@ -57,8 +57,9 @@ class ParameterProperties {
      */
     getConstructor(node) {
         const classBody = node.body;
+
         return classBody.body.find(subNode => {
-            return subNode.type === 'ClassMethod' && subNode.kind === 'constructor';
+            return this.types.isClassMethod(subNode) && subNode.kind === 'constructor';
         });
     }
 
@@ -72,9 +73,10 @@ class ParameterProperties {
     insertAssignments(ctor) {
         const ctorBody = ctor.body.body;
         const superIndex = ctorBody.findIndex(n =>
-            n.type === 'ExpressionStatement' &&
-                    n.expression.type === 'CallExpression' &&
-                    n.expression.callee.type === 'Super');
+            this.types.isExpressionStatement(n) &&
+            this.types.isCallExpression(n.expression) &&
+            this.types.isSuper(n.expression.callee)
+        );
 
         ctor.params.forEach((param, i) => {
             const assignment = this.getAssignmentStatement(param);
