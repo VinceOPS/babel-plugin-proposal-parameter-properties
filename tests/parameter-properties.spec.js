@@ -70,7 +70,7 @@ describe('ParameterProperties', () => {
     describe('insertAssignments', () => {
         it('inserts all expected assignments', () => {
             const paramsCount = 3;
-            const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);;
+            const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);
 
             const ctor = t.classMethod('constructor',
                 t.identifier('constructor'),
@@ -94,7 +94,7 @@ describe('ParameterProperties', () => {
 
         it('inserts after a call to super()', () => {
             const paramsCount = 2;
-            const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);;
+            const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);
 
             const ctor = t.classMethod('constructor',
                 t.identifier('constructor'),
