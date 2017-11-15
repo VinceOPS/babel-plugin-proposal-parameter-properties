@@ -68,7 +68,7 @@ describe('ParameterProperties', () => {
     });
 
     describe('insertAssignments', () => {
-        it('inserts all expected assignments', () => {
+        it('inserts the correct amount of assignments', () => {
             const paramsCount = 3;
             const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);
 
@@ -81,6 +81,18 @@ describe('ParameterProperties', () => {
 
             paramProps.insertAssignments(ctor);
             expect(ctorBody.length).toBe(paramsCount);
+        });
+
+        it('inserts all expected assignments', () => {
+            const paramsCount = 3;
+            const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);
+
+            const ctor = t.classMethod('constructor',
+                t.identifier('constructor'),
+                params.map(e => t.identifier(e)),
+                t.blockStatement([]));
+            const ctorBody = ctor.body.body;
+            classBody.body.push(ctor);
 
             ctorBody.forEach((node, i) => {
                 const expr = node.expression;
@@ -90,6 +102,28 @@ describe('ParameterProperties', () => {
                 expect(expr.left.property.name).toBe(`prop${i}`);
                 expect(expr.right.name).toBe(`prop${i}`);
             });
+        });
+    });
+
+    describe('insertAssignments with super()', () => {
+        it('inserts the correct amount of assignments', () => {
+            const paramsCount = 4;
+            const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);
+
+            const ctor = t.classMethod('constructor',
+                t.identifier('constructor'),
+                params.map(e => t.identifier(e)),
+                t.blockStatement([
+                    // add call to super()
+                    t.expressionStatement(
+                        t.callExpression(t.super(), [])
+                    )
+                ]));
+            const ctorBody = ctor.body.body;
+            classBody.body.push(ctor);
+
+            paramProps.insertAssignments(ctor);
+            expect(ctorBody.length).toBe(paramsCount + 1);
         });
 
         it('inserts after a call to super()', () => {
@@ -107,9 +141,6 @@ describe('ParameterProperties', () => {
                 ]));
             const ctorBody = ctor.body.body;
             classBody.body.push(ctor);
-
-            paramProps.insertAssignments(ctor);
-            expect(ctorBody.length).toBe(paramsCount + 1);
 
             ctorBody.forEach((node, i) => {
                 const expr = node.expression;
