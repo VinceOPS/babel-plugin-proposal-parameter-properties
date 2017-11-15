@@ -11,7 +11,7 @@ This is especially useful when using dependency injection.
 ```js
 @paramProperties
 class HelloComponent {
-    constructor(broadcastService, message, name) {
+    constructor(@pp broadcastService, message, name) {
     }
 }
 ```
@@ -22,8 +22,6 @@ class HelloComponent {
 class HelloComponent {
     constructor(broadcastService, message, name) {
         this.broadcastService = broadcastService;
-        this.message = message;
-        this.name = name;
     }
 }
 ```

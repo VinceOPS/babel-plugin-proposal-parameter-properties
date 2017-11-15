@@ -2,7 +2,8 @@ import ParameterProperties from '../src/parameter-properties';
 import {types} from 'babel-core';
 
 const t = types;
-const DECORATOR = 'paramProperties';
+const CLASS_DECORATOR = 'paramProperties';
+const PARAM_DECORATOR = 'pp';
 
 describe('ParameterProperties', () => {
     /** @type {ParameterProperties} */
@@ -16,15 +17,18 @@ describe('ParameterProperties', () => {
     let classDeclaration;
     /** @type {babel.types.Decorator} */
     let decorator;
+    /** @type {babel.types.Decorator[]} */
+    let paramDecorators;
 
     beforeEach(() => {
         identifier = t.identifier('MyClass');
-        decorator = t.decorator(t.identifier(DECORATOR));
+        decorator = t.decorator(t.identifier(CLASS_DECORATOR));
         classBody = t.classBody([]);
         classDeclaration = t.classDeclaration(identifier,
             null,
             classBody,
             [decorator]);
+        paramDecorators = [t.decorator(t.identifier(PARAM_DECORATOR))];
     });
 
     describe('getDecorator', () => {
@@ -42,7 +46,7 @@ describe('ParameterProperties', () => {
             const dec = paramProps.getDecorator(classDeclaration);
             expect(dec).not.toBeFalsy();
             expect(dec.expression).not.toBeFalsy();
-            expect(dec.expression.name).toBe(DECORATOR);
+            expect(dec.expression.name).toBe(CLASS_DECORATOR);
         });
 
         it('returns it only once', () => {
@@ -51,7 +55,7 @@ describe('ParameterProperties', () => {
             const dec = paramProps.getDecorator(classDeclaration);
             expect(dec).not.toBeFalsy();
             expect(dec.expression).not.toBeFalsy();
-            expect(dec.expression.name).toBe(DECORATOR);
+            expect(dec.expression.name).toBe(CLASS_DECORATOR);
         });
     });
 
@@ -74,7 +78,11 @@ describe('ParameterProperties', () => {
 
             const ctor = t.classMethod('constructor',
                 t.identifier('constructor'),
-                params.map(e => t.identifier(e)),
+                params.map(e => {
+                    const identifier = t.identifier(e);
+                    identifier.decorators = paramDecorators;
+                    return identifier;
+                }),
                 t.blockStatement([]));
             const ctorBody = ctor.body.body;
             classBody.body.push(ctor);
@@ -89,11 +97,18 @@ describe('ParameterProperties', () => {
 
             const ctor = t.classMethod('constructor',
                 t.identifier('constructor'),
-                params.map(e => t.identifier(e)),
+                params.map(e => {
+                    const identifier = t.identifier(e);
+                    identifier.decorators = paramDecorators;
+                    return identifier;
+                }),
                 t.blockStatement([]));
             const ctorBody = ctor.body.body;
             classBody.body.push(ctor);
 
+            paramProps.insertAssignments(ctor);
+
+            expect(ctorBody.length).toBe(3);
             ctorBody.forEach((node, i) => {
                 const expr = node.expression;
                 expect(expr.type).toBe('AssignmentExpression');
@@ -102,6 +117,42 @@ describe('ParameterProperties', () => {
                 expect(expr.left.property.name).toBe(`prop${i}`);
                 expect(expr.right.name).toBe(`prop${i}`);
             });
+        });
+
+        it('does not add assignments for non-pp parameters', () => {
+            const paramsCount = 3;
+            const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);
+            const ctorParams = params.map(e => t.identifier(e));
+            // only 1 parameter is decorated
+            ctorParams[0].decorators = paramDecorators;
+
+            const ctor = t.classMethod('constructor',
+                t.identifier('constructor'),
+                ctorParams,
+                t.blockStatement([]));
+            const ctorBody = ctor.body.body;
+            classBody.body.push(ctor);
+
+            paramProps.insertAssignments(ctor);
+            expect(ctorBody.length).toBe(1);
+            expect(ctorBody[0].expression.right.name).toBe('prop0');
+        });
+
+        it('removes decorator (@pp) from constructor parameters', () => {
+            const paramsCount = 3;
+            const params = Array(paramsCount).fill().map((e, i) => `prop${i}`);
+            const ctorParams = params.map(e => t.identifier(e));
+            // only 1 parameter is decorated
+            ctorParams[0].decorators = paramDecorators;
+
+            const ctor = t.classMethod('constructor',
+                t.identifier('constructor'),
+                ctorParams,
+                t.blockStatement([]));
+            classBody.body.push(ctor);
+
+            paramProps.insertAssignments(ctor);
+            expect(ctorParams[0].decorators.length).toBe(0);
         });
     });
 
@@ -112,7 +163,11 @@ describe('ParameterProperties', () => {
 
             const ctor = t.classMethod('constructor',
                 t.identifier('constructor'),
-                params.map(e => t.identifier(e)),
+                params.map(e => {
+                    const identifier = t.identifier(e);
+                    identifier.decorators = paramDecorators;
+                    return identifier;
+                }),
                 t.blockStatement([
                     // add call to super()
                     t.expressionStatement(
@@ -142,6 +197,7 @@ describe('ParameterProperties', () => {
             const ctorBody = ctor.body.body;
             classBody.body.push(ctor);
 
+            expect(ctorBody.length).not.toBe(0);
             ctorBody.forEach((node, i) => {
                 const expr = node.expression;
 

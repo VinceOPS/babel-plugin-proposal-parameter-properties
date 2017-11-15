@@ -1,4 +1,5 @@
-const DECORATOR = 'paramProperties';
+const CLASS_DECORATOR = 'paramProperties';
+const PARAMETER_DECORATOR = 'pp';
 
 class ParameterProperties {
     constructor(types) {
@@ -32,7 +33,7 @@ class ParameterProperties {
      */
     getDecorator(node) {
         return (node.decorators || []).find(decorator => {
-            return decorator.expression.name === DECORATOR;
+            return decorator.expression.name === CLASS_DECORATOR;
         });
     }
 
@@ -44,7 +45,7 @@ class ParameterProperties {
      */
     undecorate(node) {
         node.decorators = node.decorators.filter(d => {
-            return d.expression && d.expression.name !== DECORATOR;
+            return d.expression && d.expression.name !== CLASS_DECORATOR;
         });
     }
 
@@ -78,10 +79,40 @@ class ParameterProperties {
             this.types.isSuper(n.expression.callee)
         );
 
-        ctor.params.forEach((param, i) => {
-            const assignment = this.getAssignmentStatement(param);
-            const index = superIndex + 1 + i;
-            ctorBody.splice(index, 0, assignment);
+        let assignmentCount = 0;
+        ctor.params.forEach(param => {
+            if (this.isParamProperty(param)) {
+                const assignment = this.getAssignmentStatement(param);
+                const index = superIndex + 1 + assignmentCount;
+                ctorBody.splice(index, 0, assignment);
+                ++assignmentCount;
+                this.undecorateParameter(param);
+            }
+        });
+    }
+
+    /**
+     * Determine whether the given identifier is decorated as a
+     * parameter-property.
+     *
+     * @param {babel.types.Identifier} param Constructor parameter.
+     *
+     * @return {boolean} `true` if the given parameter is decorated.
+     */
+    isParamProperty(param) {
+        return (param.decorators || []).find(decorator => {
+            return decorator.expression.name === PARAMETER_DECORATOR;
+        });
+    }
+
+    /**
+     * Remove 'pp' decorators from the constructor parameter.
+     *
+     * @param {babel.types.Identifier} param Constructor parameter.
+     */
+    undecorateParameter(param) {
+        param.decorators = param.decorators.filter(d => {
+            return d.expression && d.expression.name !== PARAMETER_DECORATOR;
         });
     }
 
